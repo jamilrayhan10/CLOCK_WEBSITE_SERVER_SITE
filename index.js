@@ -23,6 +23,7 @@ async function run() {
     const servicesCollection = database.collection("service");
     const ordersCollection = database.collection("users");
     const reviewCollection = database.collection("review");
+    const adminUserCollection = database.collection("adminUser");
 
     // get api
     app.get("/services", async (req, res) => {
@@ -81,6 +82,7 @@ async function run() {
       const result = await ordersCollection.insertOne(order);
       res.json("result");
     });
+
     // get api for orders
     app.get("/myorders/:email", async (req, res) => {
       const email = req.params.email;
@@ -110,9 +112,10 @@ async function run() {
       }
       res.json({ admin: isAdmin });
     });
+    // user post api
     app.post("/users", async (req, res) => {
       const user = req.body;
-      const result = ordersCollection.insertOne(user);
+      const result = await adminUserCollection.insertOne(user);
       console.log(result);
       res.json(result);
     });
@@ -121,7 +124,7 @@ async function run() {
       const filter = { email: user.email };
       const options = { upsert: true };
       const updateDoc = { $set: user };
-      const result = await ordersCollection.updateOne(
+      const result = await adminUserCollection.updateOne(
         filter,
         updateDoc,
         options
@@ -134,7 +137,7 @@ async function run() {
       console.log("put", user);
       const filter = { email: user.email };
       const updateDoc = { $set: { role: "admin" } };
-      const result = await ordersCollection.updateOne(filter, updateDoc);
+      const result = await adminUserCollection.updateOne(filter, updateDoc);
       res.json(result);
     });
   } finally {
